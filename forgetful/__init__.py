@@ -3,7 +3,10 @@ import threading
 
 try:
     from raven.contrib.django.models import client as sentry_client
-    error_report = sentry_client.create_from_exception
+    error_report = getattr(sentry_client, 'captureException', None) or \
+        getattr(sentry_client, 'create_from_exception', None)
+    assert error_report, 'raven library does not have captureException or \
+        create_from_exception methods, unsupported version'
 except ImportError:
     error_report = lambda: None
 
